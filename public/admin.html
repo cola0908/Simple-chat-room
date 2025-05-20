@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>聊天室管理后台</title>
+  <style>
+    :root {
+      --primary-color: #4CAF50;
+      --error-color: #f44336;
+      --bg-color: #f5f5f5;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .admin-panel {
+      display: none;
+      flex-direction: column;
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--text-color);
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group {
+      margin-bottom: 1rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .error-message {
+      color: var(--error-color);
+      text-align: center;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .success-message {
+      color: var(--primary-color);
+      text-align: center;
+      margin-bottom: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="login-form" class="login-container">
+      <h2>管理员登录</h2>
+      <div class="error-message" id="login-error"></div>
+      <div class="input-group">
+        <input type="text" id="username" placeholder="用户名" />
+      </div>
+      <div class="input-group">
+        <input type="password" id="password" placeholder="密码" />
+      </div>
+      <button onclick="login()">登录</button>
+    </div>
+
+    <div id="admin-panel" class="admin-panel">
+      <h2>管理面板</h2>
+      <div class="success-message" id="success-message"></div>
+      <button onclick="clearCache()">清空聊天记录</button>
+      <button onclick="logout()" style="margin-top: 1rem; background-color: #666;">退出登录</button>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_USERNAME = 'admin';
+    const ADMIN_PASSWORD = 'admin123';
+
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const loginError = document.getElementById('login-error');
+
+      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('admin-panel').style.display = 'flex';
+        loginError.style.display = 'none';
+      } else {
+        loginError.textContent = '用户名或密码错误';
+        loginError.style.display = 'block';
+      }
+    }
+
+    function logout() {
+      document.getElementById('login-form').style.display = 'flex';
+      document.getElementById('admin-panel').style.display = 'none';
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+    }
+
+    function clearCache() {
+      fetch('/admin/clear-cache', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: ADMIN_USERNAME,
+          password: ADMIN_PASSWORD
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        const successMessage = document.getElementById('success-message');
+        successMessage.textContent = data.message;
+        successMessage.style.display = 'block';
+        setTimeout(() => {
+          successMessage.style.display = 'none';
+        }, 3000);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+  </script>
+</body>
+</html>
